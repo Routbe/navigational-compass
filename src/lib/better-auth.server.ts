@@ -317,9 +317,10 @@ export function createRoutAuth(request?: Request) {
     databaseHooks: {
       session: {
         create: {
-          after: async (session: { id: string; userId: string; userAgent?: string | null }) => {
+          after: async (session: { id: string; userId?: string; userAgent?: string | null }) => {
+            if (!session.userId) return;
             const { later, notifyNewSignIn } = await import("./site-mail.server");
-            later(() => notifyNewSignIn(session.userId, session.id, session.userAgent ?? null));
+            later(() => notifyNewSignIn(session.userId as string, session.id, session.userAgent ?? null));
           },
         },
       },
