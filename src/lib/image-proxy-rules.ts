@@ -12,6 +12,7 @@ export const PROXY_HOSTS = [
   "wakatime.com",
   "sdk.bitmoji.com",
   "images.bitmoji.com",
+  "images.chesscomfiles.com",
 ];
 
 export function isAllowedProxyUrl(raw: string): URL | null {

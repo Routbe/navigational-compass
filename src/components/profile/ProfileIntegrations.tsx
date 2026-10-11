@@ -11,7 +11,13 @@ type Item = {
   provider: string;
   handle: string;
   verified: boolean;
-  status: { title?: string; subtitle?: string; url?: string; image?: string | null } | null;
+  status: {
+    title?: string;
+    subtitle?: string;
+    url?: string;
+    image?: string | null;
+    chess?: { blitz?: number | null; rapid?: number | null; online?: boolean | null; challengeUrl?: string };
+  } | null;
 };
 type Theme = { card: string; border: string; text: string; muted: string };
 
@@ -36,7 +42,56 @@ export function ProfileIntegrations({ handle, theme, mode = null }: { handle: st
   );
 }
 
+function ChessCard({ item, theme }: { item: Item; theme: Theme }) {
+  const meta = integrationById(item.provider);
+  const c = item.status?.chess ?? {};
+  const img = proxied(item.status?.image);
+  const online = c.online === true;
+  return (
+    <div className="flex items-center gap-3 rounded-2xl p-2.5" style={{ background: theme.card, border: `1px solid ${theme.border}`, color: theme.text }}>
+      <a href={item.status?.url} target="_blank" rel="noopener noreferrer" className="relative shrink-0">
+        {img ? (
+          <img src={img} alt="" loading="lazy" referrerPolicy="no-referrer" className="h-11 w-11 rounded-lg object-cover" />
+        ) : (
+          <span className="flex h-11 w-11 items-center justify-center rounded-lg" style={{ border: `1px solid ${theme.border}` }}>
+            <BrandIcon icon={meta?.icon ?? null} className="h-5 w-5" />
+          </span>
+        )}
+        {online && (
+          <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3" aria-label="Nu online" title="Nu online">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+            <span className="relative inline-flex h-3 w-3 rounded-full border-2 bg-emerald-500" style={{ borderColor: theme.card }} />
+          </span>
+        )}
+      </a>
+      <span className="min-w-0 flex-1 text-left">
+        <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider" style={{ color: theme.muted }}>
+          {meta?.label}
+          {online && <span className="normal-case tracking-normal text-emerald-500">· online</span>}
+        </span>
+        <span className="block truncate text-sm font-medium">{item.status?.title ?? item.handle}</span>
+        <span className="mt-0.5 flex gap-1.5 text-[11px] tabular-nums" style={{ color: theme.muted }}>
+          {c.blitz ? <span className="rounded px-1.5" style={{ border: `1px solid ${theme.border}` }}>⚡ {c.blitz}</span> : null}
+          {c.rapid ? <span className="rounded px-1.5" style={{ border: `1px solid ${theme.border}` }}>⏱ {c.rapid}</span> : null}
+        </span>
+      </span>
+      {c.challengeUrl && (
+        <a
+          href={c.challengeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-opacity hover:opacity-80"
+          style={{ background: theme.text, color: theme.card }}
+        >
+          Uitdagen
+        </a>
+      )}
+    </div>
+  );
+}
+
 function Card({ item, theme }: { item: Item; theme: Theme }) {
+  if (item.status?.chess) return <ChessCard item={item} theme={theme} />;
   const meta = integrationById(item.provider);
   const [showQr, setShowQr] = useState(false);
   const pay = paymentUri(item.provider, item.handle);

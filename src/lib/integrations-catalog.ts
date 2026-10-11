@@ -82,8 +82,8 @@ export const INTEGRATIONS: Integration[] = [
   soon("pinterest", "Pinterest", "design", "siPinterest"),
   // Cultuur & Vrije Tijd
   soon("letterboxd", "Letterboxd", "culture", "siLetterboxd"),
-  soon("chesscom", "Chess.com", "culture", "siChessdotcom"),
-  soon("lichess", "Lichess", "culture", "siLichess"),
+  { id: "chesscom", label: "Chess.com", category: "culture", icon: "siChessdotcom", mode: "handle", placeholder: "Chess.com-gebruikersnaam" },
+  { id: "lichess", label: "Lichess", category: "culture", icon: "siLichess", mode: "handle", placeholder: "Lichess-gebruikersnaam" },
   soon("storygraph", "StoryGraph", "culture", null),
   soon("goodreads", "Goodreads", "culture", "siGoodreads"),
   // Smart Home & Zelf-Gehost
