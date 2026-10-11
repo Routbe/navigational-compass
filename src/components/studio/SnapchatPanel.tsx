@@ -43,7 +43,7 @@ export function SnapchatPanel() {
     window.history.replaceState(null, "", url.toString());
   }, []);
 
-  const save = async (p: Parameters<typeof update>[0]["data"]) => {
+  const save = async (p: { moodEmoji?: string | null; moodText?: string | null; showCard?: boolean; showMood?: boolean }) => {
     await update({ data: p });
     await qc.invalidateQueries({ queryKey: ["my-snapchat"] });
   };
