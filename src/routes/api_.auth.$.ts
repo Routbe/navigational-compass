@@ -103,6 +103,14 @@ export async function handleAuthRequest({ request }: { request: Request }) {
       ? pathname.slice("/api/auth".length) || "/"
       : pathname;
     const provider = (await providerFromBody(request, relativePath)) ?? providerFromPath(relativePath);
+    // Zero-trust admin portal: social/OAuth sign-in is refused server-side.
+    const { appMode, socialLoginAllowed } = await import("@/lib/app-mode");
+    if (provider && !socialLoginAllowed(appMode())) {
+      return Response.json(
+        { code: "social_login_disabled", message: "Sociale logins zijn uitgeschakeld op het beheerportaal." },
+        { status: 403, headers: { "cache-control": "no-store" } },
+      );
+    }
     if (provider && !isProviderConfigured(provider)) {
       return providerNotConfigured(provider, missingProviderKeys(provider));
     }

@@ -26,6 +26,7 @@ const AUTH_ERROR_TEXT: Record<string, string> = {
 import { getEnabledProviders } from "@/lib/auth-providers.functions";
 import { Altcha } from "@/components/Altcha";
 import { AUTH_PROVIDERS, KEYED_PROVIDERS, FediverseDialog, ProviderMark } from "@/components/auth/ProviderKit";
+import { isAdminMode } from "@/lib/app-mode";
 import { takeProof } from "@/lib/altcha-client";
 import { OtpInput } from "@/components/otp/OtpInput";
 import { redeemLoginCodeFn } from "@/lib/login-code.functions";
@@ -110,7 +111,8 @@ export default function AuthNeon({ initialMode = "magic" }: { initialMode?: Mode
 
   // Het volledige raster blijft altijd zichtbaar; een provider zonder sleutels
   // stuurt geen aanvraag maar toont een duidelijke melding (zie `oauth`).
-  const visibleTiles = AUTH_PROVIDERS;
+  // Admin-portaal (zero-trust): geen sociale logins, alleen e-mail/magic link + passkeys.
+  const visibleTiles = isAdminMode() ? [] : AUTH_PROVIDERS;
   const isInactive = (provider: string) =>
     KEYED_PROVIDERS.has(provider) && enabled !== null && !enabled.includes(provider);
 
