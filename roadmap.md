@@ -11,7 +11,7 @@
 - [x] J: Opgeslagen kaartontwerpen
 
 ## Open (uit specificaties)
-- [ ] Badges: badges/user_badges/badge_issuers + /admin/badges + badge-popup op profiel
-- [ ] Snapchat Login Kit + Bitmoji-picker + Snapchat-kaart + status/mood (wacht op Snap Kit client ID/secret)
+- [x] Badges: wapenschilden (db/86), uploader/bewerken in /admin/custom-badges, interactieve pop-up op profiel
+- [ ] Snapchat Login Kit + Bitmoji-picker + handmatige status/mood-widget (geen Snap Map/GPS) (wacht op Snap Kit client ID/secret)
 - [ ] Admin-portaal split (APP_MODE, rout.dlp.li, noindex)
 - [ ] Testsuite account-merge / security-code / sms-provider / telegram
