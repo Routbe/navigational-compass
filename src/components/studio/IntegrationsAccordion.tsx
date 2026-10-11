@@ -16,6 +16,7 @@ import {
 } from "@/lib/integrations-catalog";
 import { normalizeIntegrationValue, type Audience } from "@/lib/integrations-rules";
 import { disconnectSpotifyPresence, setSpotifyPresenceScope, getMyPresence, setSpotifyPresenceVisible } from "@/lib/presence.functions";
+import { SnapchatPanel } from "@/components/studio/SnapchatPanel";
 import { getMyIntegrations, removeIntegration, saveIntegration } from "@/lib/integrations.functions";
 
 const SPOTIFY_MESSAGES: Record<string, [ok: boolean, text: string]> = {

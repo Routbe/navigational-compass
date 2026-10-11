@@ -100,6 +100,7 @@ import { Route as ApiPublicIntegrationsRouteImport } from './routes/api_.public.
 import { Route as ApiPublicProxyImageRouteImport } from './routes/api_.public.proxy-image'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api_.public.stripe-webhook'
 import { Route as ApiPublicWeatherRouteImport } from './routes/api_.public.weather'
+import { Route as ApiSnapchatStartRouteImport } from './routes/api_.snapchat.start'
 import { Route as ApiSpotifyStartRouteImport } from './routes/api_.spotify.start'
 import { Route as AuthMastodonCallbackRouteImport } from './routes/auth_.mastodon.callback'
 import { Route as RUAliasRouteImport } from './routes/r.u.$alias'
@@ -132,6 +133,7 @@ import { Route as ApiPublicOgHandleRouteImport } from './routes/api_.public.og.$
 import { Route as ApiPublicQrUploadRouteImport } from './routes/api_.public.qr.upload'
 import { Route as ApiPublicSessionLogoutRouteImport } from './routes/api_.public.session.logout'
 import { Route as ApiPublicSmsInboundRouteImport } from './routes/api_.public.sms.inbound'
+import { Route as ApiPublicSnapchatCallbackRouteImport } from './routes/api_.public.snapchat.callback'
 import { Route as ApiPublicSpotifyCallbackRouteImport } from './routes/api_.public.spotify.callback'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api_.public.telegram.webhook'
 import { Route as ApiPublicWeatherWebhookTokenRouteImport } from './routes/api_.public.weather-webhook.$token'
@@ -620,6 +622,11 @@ const ApiPublicWeatherRoute = ApiPublicWeatherRouteImport.update({
   path: '/api/public/weather',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSnapchatStartRoute = ApiSnapchatStartRouteImport.update({
+  id: '/api_/snapchat/start',
+  path: '/api/snapchat/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSpotifyStartRoute = ApiSpotifyStartRouteImport.update({
   id: '/api_/spotify/start',
   path: '/api/spotify/start',
@@ -795,6 +802,12 @@ const ApiPublicSmsInboundRoute = ApiPublicSmsInboundRouteImport.update({
   path: '/api/public/sms/inbound',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSnapchatCallbackRoute =
+  ApiPublicSnapchatCallbackRouteImport.update({
+    id: '/api_/public/snapchat/callback',
+    path: '/api/public/snapchat/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicSpotifyCallbackRoute =
   ApiPublicSpotifyCallbackRouteImport.update({
     id: '/api_/public/spotify/callback',
@@ -994,6 +1007,7 @@ export interface FileRoutesByFullPath {
   '/api/public/proxy-image': typeof ApiPublicProxyImageRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/weather': typeof ApiPublicWeatherRoute
+  '/api/snapchat/start': typeof ApiSnapchatStartRoute
   '/api/spotify/start': typeof ApiSpotifyStartRoute
   '/auth/mastodon/callback': typeof AuthMastodonCallbackRoute
   '/r/u/$alias': typeof RUAliasRoute
@@ -1026,6 +1040,7 @@ export interface FileRoutesByFullPath {
   '/api/public/qr/upload': typeof ApiPublicQrUploadRoute
   '/api/public/session/logout': typeof ApiPublicSessionLogoutRoute
   '/api/public/sms/inbound': typeof ApiPublicSmsInboundRoute
+  '/api/public/snapchat/callback': typeof ApiPublicSnapchatCallbackRoute
   '/api/public/spotify/callback': typeof ApiPublicSpotifyCallbackRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/public/weather-webhook/$token': typeof ApiPublicWeatherWebhookTokenRoute
@@ -1133,6 +1148,7 @@ export interface FileRoutesByTo {
   '/api/public/proxy-image': typeof ApiPublicProxyImageRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/weather': typeof ApiPublicWeatherRoute
+  '/api/snapchat/start': typeof ApiSnapchatStartRoute
   '/api/spotify/start': typeof ApiSpotifyStartRoute
   '/auth/mastodon/callback': typeof AuthMastodonCallbackRoute
   '/r/u/$alias': typeof RUAliasRoute
@@ -1164,6 +1180,7 @@ export interface FileRoutesByTo {
   '/api/public/qr/upload': typeof ApiPublicQrUploadRoute
   '/api/public/session/logout': typeof ApiPublicSessionLogoutRoute
   '/api/public/sms/inbound': typeof ApiPublicSmsInboundRoute
+  '/api/public/snapchat/callback': typeof ApiPublicSnapchatCallbackRoute
   '/api/public/spotify/callback': typeof ApiPublicSpotifyCallbackRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api/public/weather-webhook/$token': typeof ApiPublicWeatherWebhookTokenRoute
@@ -1276,6 +1293,7 @@ export interface FileRoutesById {
   '/api_/public/proxy-image': typeof ApiPublicProxyImageRoute
   '/api_/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api_/public/weather': typeof ApiPublicWeatherRoute
+  '/api_/snapchat/start': typeof ApiSnapchatStartRoute
   '/api_/spotify/start': typeof ApiSpotifyStartRoute
   '/auth_/mastodon/callback': typeof AuthMastodonCallbackRoute
   '/r/u/$alias': typeof RUAliasRoute
@@ -1308,6 +1326,7 @@ export interface FileRoutesById {
   '/api_/public/qr/upload': typeof ApiPublicQrUploadRoute
   '/api_/public/session/logout': typeof ApiPublicSessionLogoutRoute
   '/api_/public/sms/inbound': typeof ApiPublicSmsInboundRoute
+  '/api_/public/snapchat/callback': typeof ApiPublicSnapchatCallbackRoute
   '/api_/public/spotify/callback': typeof ApiPublicSpotifyCallbackRoute
   '/api_/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
   '/api_/public/weather-webhook/$token': typeof ApiPublicWeatherWebhookTokenRoute
@@ -1420,6 +1439,7 @@ export interface FileRouteTypes {
     | '/api/public/proxy-image'
     | '/api/public/stripe-webhook'
     | '/api/public/weather'
+    | '/api/snapchat/start'
     | '/api/spotify/start'
     | '/auth/mastodon/callback'
     | '/r/u/$alias'
@@ -1452,6 +1472,7 @@ export interface FileRouteTypes {
     | '/api/public/qr/upload'
     | '/api/public/session/logout'
     | '/api/public/sms/inbound'
+    | '/api/public/snapchat/callback'
     | '/api/public/spotify/callback'
     | '/api/public/telegram/webhook'
     | '/api/public/weather-webhook/$token'
@@ -1559,6 +1580,7 @@ export interface FileRouteTypes {
     | '/api/public/proxy-image'
     | '/api/public/stripe-webhook'
     | '/api/public/weather'
+    | '/api/snapchat/start'
     | '/api/spotify/start'
     | '/auth/mastodon/callback'
     | '/r/u/$alias'
@@ -1590,6 +1612,7 @@ export interface FileRouteTypes {
     | '/api/public/qr/upload'
     | '/api/public/session/logout'
     | '/api/public/sms/inbound'
+    | '/api/public/snapchat/callback'
     | '/api/public/spotify/callback'
     | '/api/public/telegram/webhook'
     | '/api/public/weather-webhook/$token'
@@ -1701,6 +1724,7 @@ export interface FileRouteTypes {
     | '/api_/public/proxy-image'
     | '/api_/public/stripe-webhook'
     | '/api_/public/weather'
+    | '/api_/snapchat/start'
     | '/api_/spotify/start'
     | '/auth_/mastodon/callback'
     | '/r/u/$alias'
@@ -1733,6 +1757,7 @@ export interface FileRouteTypes {
     | '/api_/public/qr/upload'
     | '/api_/public/session/logout'
     | '/api_/public/sms/inbound'
+    | '/api_/public/snapchat/callback'
     | '/api_/public/spotify/callback'
     | '/api_/public/telegram/webhook'
     | '/api_/public/weather-webhook/$token'
@@ -1816,6 +1841,7 @@ export interface RootRouteChildren {
   ApiPublicProxyImageRoute: typeof ApiPublicProxyImageRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   ApiPublicWeatherRoute: typeof ApiPublicWeatherRoute
+  ApiSnapchatStartRoute: typeof ApiSnapchatStartRoute
   ApiSpotifyStartRoute: typeof ApiSpotifyStartRoute
   AuthMastodonCallbackRoute: typeof AuthMastodonCallbackRoute
   RUAliasRoute: typeof RUAliasRoute
@@ -1842,6 +1868,7 @@ export interface RootRouteChildren {
   ApiPublicQrUploadRoute: typeof ApiPublicQrUploadRoute
   ApiPublicSessionLogoutRoute: typeof ApiPublicSessionLogoutRoute
   ApiPublicSmsInboundRoute: typeof ApiPublicSmsInboundRoute
+  ApiPublicSnapchatCallbackRoute: typeof ApiPublicSnapchatCallbackRoute
   ApiPublicSpotifyCallbackRoute: typeof ApiPublicSpotifyCallbackRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
   ApiPublicWeatherWebhookTokenRoute: typeof ApiPublicWeatherWebhookTokenRoute
@@ -2488,6 +2515,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWeatherRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api_/snapchat/start': {
+      id: '/api_/snapchat/start'
+      path: '/api/snapchat/start'
+      fullPath: '/api/snapchat/start'
+      preLoaderRoute: typeof ApiSnapchatStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api_/spotify/start': {
       id: '/api_/spotify/start'
       path: '/api/spotify/start'
@@ -2710,6 +2744,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/sms/inbound'
       fullPath: '/api/public/sms/inbound'
       preLoaderRoute: typeof ApiPublicSmsInboundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api_/public/snapchat/callback': {
+      id: '/api_/public/snapchat/callback'
+      path: '/api/public/snapchat/callback'
+      fullPath: '/api/public/snapchat/callback'
+      preLoaderRoute: typeof ApiPublicSnapchatCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api_/public/spotify/callback': {
@@ -3115,6 +3156,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicProxyImageRoute: ApiPublicProxyImageRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   ApiPublicWeatherRoute: ApiPublicWeatherRoute,
+  ApiSnapchatStartRoute: ApiSnapchatStartRoute,
   ApiSpotifyStartRoute: ApiSpotifyStartRoute,
   AuthMastodonCallbackRoute: AuthMastodonCallbackRoute,
   RUAliasRoute: RUAliasRoute,
@@ -3142,6 +3184,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicQrUploadRoute: ApiPublicQrUploadRoute,
   ApiPublicSessionLogoutRoute: ApiPublicSessionLogoutRoute,
   ApiPublicSmsInboundRoute: ApiPublicSmsInboundRoute,
+  ApiPublicSnapchatCallbackRoute: ApiPublicSnapchatCallbackRoute,
   ApiPublicSpotifyCallbackRoute: ApiPublicSpotifyCallbackRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
   ApiPublicWeatherWebhookTokenRoute: ApiPublicWeatherWebhookTokenRoute,
