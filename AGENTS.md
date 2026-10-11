@@ -29,3 +29,5 @@
 - Emailed action links (review, booking) only confirm on GET, change on POST; status mails send fire-and-forget. Why: scanners open links; mail failures never block actions.
 - 2FA/passkeys: Better Auth `twoFactor` + `@better-auth/passkey`, tables in `neon_auth` (db/77). Why: no custom crypto.
 - Uploaded user files are tracked in `user_assets` (db/80) with retention set server-side by `asset-retention.ts`; expired rows are purged by `/api/public/cron/cleanup-assets`. Why: storage never grows without an owner or an end date.
+- Migrations are applied with `bun scripts/migrate-gateway.ts` (splits each `db/NN_*.sql` into statements, one gateway batch = one transaction, tracked in `schema_migrations`). Why: the gateway rejects multi-statement queries and no direct connection string exists.
+- Public Spotify reads go through the `user_music_status` cache (db/85, ~10 s freshness) and return the server `syncedAt`; the widget interpolates locally. Why: visitors must never fan out into Spotify rate limits.
