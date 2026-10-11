@@ -28,7 +28,7 @@ export function isAdminPath(pathname: string): boolean {
 export function isAdminPortalPath(pathname: string): boolean {
   return (
     isAdminPath(pathname) ||
-    /^\/(auth|api\/auth|api_\/auth|_serverFn|assets|@|src\/|node_modules\/|__)/.test(pathname) ||
+    /^\/(auth|api\/auth|api_\/auth|_serverFn|assets|@(vite|fs|id|react-refresh)|src\/|node_modules\/|__)/.test(pathname) ||
     /^\/api\/public\/(cron|altcha)/.test(pathname) ||
     /\.(js|css|map|png|svg|ico|webmanifest|json|txt|woff2?)$/.test(pathname)
   );
