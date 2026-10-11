@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Search, Shield, Trash2, X } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Save, Search, Trash2, X } from "lucide-react";
+import { BadgeEmblem } from "@/components/profile/BadgeEmblem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ import {
   adminListBadgeHolders,
   adminListCustomBadges,
   adminSetCustomBadge,
+  adminUpdateCustomBadge,
   adminUploadBadgeImage,
   adminUserCustomBadges,
 } from "@/lib/custom-badges.functions";
@@ -29,15 +31,7 @@ export const fileToBase64 = (file: Blob) =>
     r.readAsDataURL(file);
   });
 
-export function BadgeEmblem({ badge, size = 40 }: { badge: { name: string; imageUrl: string | null }; size?: number }) {
-  return badge.imageUrl ? (
-    <img src={badge.imageUrl} alt={badge.name} width={size} height={size} className="rounded-lg object-contain" style={{ width: size, height: size }} />
-  ) : (
-    <span className="grid place-items-center rounded-lg bg-muted text-muted-foreground" style={{ width: size, height: size }}>
-      <Shield className="h-1/2 w-1/2" aria-hidden />
-    </span>
-  );
-}
+export { BadgeEmblem };
 
 /** Zoekveld op handle: geeft één gekozen gebruiker terug. */
 function UserSearch({ onPick, placeholder = "Zoek op @handle of naam" }: { onPick: (u: Found) => void; placeholder?: string }) {
@@ -82,67 +76,124 @@ function UserSearch({ onPick, placeholder = "Zoek op @handle of naam" }: { onPic
   );
 }
 
-function NewBadgeForm({ onCreated }: { onCreated: () => void }) {
+const KIND_LABELS: Record<Badge["kind"], string> = {
+  crest: "Wapenschild",
+  emblem: "Embleem",
+  award: "Onderscheiding",
+  partner: "Partner",
+};
+
+type Draft = Pick<Badge, "name" | "description" | "imageUrl" | "kind" | "motto" | "story" | "issuerName" | "issuerUrl" | "accentColor">;
+const emptyDraft: Draft = { name: "", description: null, imageUrl: null, kind: "crest", motto: null, story: null, issuerName: null, issuerUrl: null, accentColor: null };
+
+/** Formulier voor nieuw of bestaand wapenschild/badge, met uploader. */
+function BadgeForm({ initial, onSaved, onCancel }: { initial?: Badge; onSaved: () => void; onCancel?: () => void }) {
   const create = useServerFn(adminCreateCustomBadge);
+  const update = useServerFn(adminUpdateCustomBadge);
   const upload = useServerFn(adminUploadBadgeImage);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [d, setD] = useState<Draft>(initial ?? emptyDraft);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((x) => ({ ...x, [k]: v }));
+  const txt = (v: string) => (v.trim() ? v : null);
 
   return (
     <form
-      className="space-y-3 rounded-2xl border border-border bg-card p-5"
+      className="space-y-4 rounded-2xl border border-border bg-card p-5"
       onSubmit={async (e) => {
         e.preventDefault();
         setBusy(true);
         try {
-          await create({ data: { name, description: description || null, imageUrl } });
-          toast.success("Badge aangemaakt");
-          setName("");
-          setDescription("");
-          setImageUrl(null);
-          onCreated();
+          if (initial) await update({ data: { id: initial.id, ...d } });
+          else await create({ data: d });
+          toast.success(initial ? "Badge bijgewerkt" : "Badge aangemaakt");
+          if (!initial) setD(emptyDraft);
+          onSaved();
         } catch {
-          toast.error("Aanmaken mislukt");
+          toast.error("Opslaan mislukt — controleer de velden");
         } finally {
           setBusy(false);
         }
       }}
     >
-      <h2 className="font-medium">Nieuwe badge</h2>
-      <div className="flex items-start gap-4">
-        <label className="cursor-pointer">
-          <BadgeEmblem badge={{ name: name || "Badge", imageUrl }} size={64} />
+      <h2 className="font-medium">{initial ? "Badge bewerken" : "Nieuwe badge of wapenschild"}</h2>
+      <div className="flex flex-col gap-5 sm:flex-row">
+        <label
+          className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-border p-4 hover:border-foreground/40"
+          onDragOver={(e) => e.preventDefault()}
+        >
+          <BadgeEmblem badge={{ name: d.name || "Badge", imageUrl: d.imageUrl, kind: d.kind, accentColor: d.accentColor }} size={96} />
+          <span className="text-xs text-muted-foreground">{uploading ? "Uploaden…" : d.imageUrl ? "Andere afbeelding" : "Afbeelding kiezen"}</span>
+          <span className="text-[10px] text-muted-foreground">PNG, JPG of WebP · max 2 MB</span>
           <input
             type="file"
             accept="image/png,image/jpeg,image/webp"
             className="sr-only"
             onChange={async (e) => {
               const file = e.target.files?.[0];
+              e.target.value = "";
               if (!file) return;
               if (file.size > 2_000_000) return toast.error("Maximaal 2 MB");
+              setUploading(true);
               const res = await upload({ data: { base64: await fileToBase64(file) } }).catch(() => null);
-              if (res?.ok) setImageUrl(res.url);
+              setUploading(false);
+              if (res?.ok) set("imageUrl", res.url);
               else toast.error(res && !res.ok ? res.message : "Upload mislukt");
             }}
           />
-          <span className="mt-1 block text-center text-[11px] text-muted-foreground">Afbeelding</span>
+          {d.imageUrl && (
+            <button type="button" className="text-[11px] text-destructive underline" onClick={(e) => { e.preventDefault(); set("imageUrl", null); }}>
+              Verwijderen
+            </button>
+          )}
         </label>
-        <div className="flex-1 space-y-2">
-          <div>
+        <div className="grid flex-1 gap-3 sm:grid-cols-2">
+          <div className="sm:col-span-2">
             <Label htmlFor="cb-name">Naam</Label>
-            <Input id="cb-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Familie Van Damme" required minLength={2} maxLength={60} />
+            <Input id="cb-name" value={d.name} onChange={(e) => set("name", e.target.value)} placeholder="Familie Van Damme" required minLength={2} maxLength={60} />
           </div>
           <div>
-            <Label htmlFor="cb-desc">Omschrijving</Label>
-            <Textarea id="cb-desc" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} rows={2} placeholder="Familiewapen sinds 1832" />
+            <Label htmlFor="cb-kind">Soort</Label>
+            <select id="cb-kind" value={d.kind} onChange={(e) => set("kind", e.target.value as Draft["kind"])} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+              {(Object.keys(KIND_LABELS) as Draft["kind"][]).map((k) => <option key={k} value={k}>{KIND_LABELS[k]}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="cb-color">Accentkleur</Label>
+            <div className="flex gap-2">
+              <input id="cb-color" type="color" value={d.accentColor ?? "#b08d3c"} onChange={(e) => set("accentColor", e.target.value)} className="h-10 w-12 rounded-md border border-input bg-background" />
+              {d.accentColor && <Button type="button" variant="ghost" size="sm" onClick={() => set("accentColor", null)}>Standaard</Button>}
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="cb-motto">Motto / devies</Label>
+            <Input id="cb-motto" value={d.motto ?? ""} onChange={(e) => set("motto", txt(e.target.value))} maxLength={80} placeholder="Fortis et fidelis" />
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="cb-desc">Korte omschrijving</Label>
+            <Input id="cb-desc" value={d.description ?? ""} onChange={(e) => set("description", txt(e.target.value))} maxLength={200} placeholder="Familiewapen sinds 1832" />
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="cb-story">Verhaal (zichtbaar in de pop-up)</Label>
+            <Textarea id="cb-story" value={d.story ?? ""} onChange={(e) => set("story", txt(e.target.value))} maxLength={1000} rows={3} />
+          </div>
+          <div>
+            <Label htmlFor="cb-issuer">Uitgegeven door</Label>
+            <Input id="cb-issuer" value={d.issuerName ?? ""} onChange={(e) => set("issuerName", txt(e.target.value))} maxLength={80} placeholder="ROUT" />
+          </div>
+          <div>
+            <Label htmlFor="cb-url">Link uitgever (https)</Label>
+            <Input id="cb-url" type="url" value={d.issuerUrl ?? ""} onChange={(e) => set("issuerUrl", txt(e.target.value))} maxLength={300} placeholder="https://" pattern="https://.*" />
           </div>
         </div>
       </div>
-      <Button type="submit" disabled={busy || name.trim().length < 2}>
-        <Plus className="mr-1.5 h-4 w-4" aria-hidden /> Badge aanmaken
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={busy || uploading || d.name.trim().length < 2}>
+          {initial ? <Save className="mr-1.5 h-4 w-4" aria-hidden /> : <Plus className="mr-1.5 h-4 w-4" aria-hidden />}
+          {initial ? "Opslaan" : "Badge aanmaken"}
+        </Button>
+        {onCancel && <Button type="button" variant="ghost" onClick={onCancel}>Annuleren</Button>}
+      </div>
     </form>
   );
 }
@@ -152,6 +203,8 @@ function BadgeDetail({ badge, onBack, onChanged }: { badge: Badge; onBack: () =>
   const setBadge = useServerFn(adminSetCustomBadge);
   const remove = useServerFn(adminDeleteCustomBadge);
   const [holders, setHolders] = useState<Holder[]>([]);
+  const [editing, setEditing] = useState(false);
+  const [reason, setReason] = useState("");
   const refresh = useCallback(() => {
     void listHolders({ data: { badgeId: badge.id } }).then(setHolders).catch(() => toast.error("Laden mislukt"));
   }, [badge.id, listHolders]);
@@ -159,7 +212,8 @@ function BadgeDetail({ badge, onBack, onChanged }: { badge: Badge; onBack: () =>
 
   const toggle = async (userId: string, granted: boolean) => {
     try {
-      await setBadge({ data: { userId, badgeId: badge.id, granted } });
+      await setBadge({ data: { userId, badgeId: badge.id, granted, reason: granted && reason.trim() ? reason.trim() : null } });
+      if (granted) setReason("");
       toast.success(granted ? "Badge toegekend" : "Badge ingetrokken");
       refresh();
       onChanged();
@@ -177,8 +231,12 @@ function BadgeDetail({ badge, onBack, onChanged }: { badge: Badge; onBack: () =>
         <BadgeEmblem badge={badge} size={72} />
         <div className="flex-1">
           <h2 className="font-display text-2xl">{badge.name}</h2>
+          {badge.motto && <p className="text-sm italic">“{badge.motto}”</p>}
           {badge.description && <p className="text-sm text-muted-foreground">{badge.description}</p>}
         </div>
+        <Button variant="outline" onClick={() => setEditing((v) => !v)}>
+          <Pencil className="mr-1.5 h-4 w-4" aria-hidden /> Bewerken
+        </Button>
         <Button
           variant="outline"
           className="text-destructive"
@@ -193,8 +251,11 @@ function BadgeDetail({ badge, onBack, onChanged }: { badge: Badge; onBack: () =>
         </Button>
       </header>
 
+      {editing && <BadgeForm initial={badge} onSaved={() => { setEditing(false); onChanged(); }} onCancel={() => setEditing(false)} />}
+
       <section className="space-y-2">
         <Label>Toekennen aan</Label>
+        <Input value={reason} onChange={(e) => setReason(e.target.value)} maxLength={200} placeholder="Reden (optioneel, zichtbaar in de pop-up) — bv. Stamhouder sinds 2024" aria-label="Reden van toekenning" />
         <UserSearch onPick={(u) => void toggle(u.userId, true)} />
       </section>
 
@@ -207,6 +268,7 @@ function BadgeDetail({ badge, onBack, onChanged }: { badge: Badge; onBack: () =>
               <span>
                 <span className="font-medium">@{h.username ?? h.userId.slice(0, 8)}</span>
                 {h.displayName && <span className="pl-2 text-muted-foreground">{h.displayName}</span>}
+                {h.reason && <span className="block text-xs text-muted-foreground">{h.reason}</span>}
               </span>
               <Button size="sm" variant="ghost" onClick={() => void toggle(h.userId, false)} aria-label={`Intrekken bij ${h.username}`}>
                 <X className="h-4 w-4" aria-hidden />
@@ -242,7 +304,7 @@ export default function AdminCustomBadges() {
         <BadgeDetail badge={current} onBack={() => setSelected(null)} onChanged={refresh} />
       ) : (
         <>
-          <NewBadgeForm onCreated={refresh} />
+          <BadgeForm onSaved={refresh} />
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {badges.map((b) => (
               <button

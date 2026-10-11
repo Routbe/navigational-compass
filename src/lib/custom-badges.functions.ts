@@ -11,6 +11,18 @@ async function guard(userId: string) {
 }
 
 const imageUrl = z.string().url().max(600).nullable().optional();
+const opt = (max: number) => z.string().trim().max(max).nullable().optional().transform((v) => (v ? v : null));
+const details = {
+  name: z.string().trim().min(2).max(60),
+  description: opt(200),
+  imageUrl: imageUrl.transform((v) => v ?? null),
+  kind: z.enum(["crest", "emblem", "award", "partner"]).default("crest"),
+  motto: opt(80),
+  story: opt(1000),
+  issuerName: opt(80),
+  issuerUrl: z.string().trim().max(300).regex(/^https:\/\//).nullable().optional().or(z.literal("")).transform((v) => (v ? v : null)),
+  accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional().or(z.literal("")).transform((v) => (v ? v : null)),
+};
 
 export const adminListCustomBadges = createServerFn({ method: "GET" })
   .middleware([requireAuth])
@@ -23,23 +35,24 @@ export const adminListCustomBadges = createServerFn({ method: "GET" })
 export const adminCreateCustomBadge = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((d: unknown) =>
-    z.object({ name: z.string().trim().min(2).max(60), description: z.string().trim().max(200).nullable().optional(), imageUrl }).parse(d),
+    z.object(details).parse(d),
   )
   .handler(async ({ data, context }) => {
     await guard(context.userId);
     const { createCustomBadge } = await import("./custom-badges.server");
-    return createCustomBadge({ name: data.name, description: data.description ?? null, imageUrl: data.imageUrl ?? null, adminId: context.userId });
+    return createCustomBadge({ ...data, adminId: context.userId });
   });
 
 export const adminUpdateCustomBadge = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((d: unknown) =>
-    z.object({ id: z.string().uuid(), name: z.string().trim().min(2).max(60), description: z.string().trim().max(200).nullable().optional(), imageUrl }).parse(d),
+    z.object({ id: z.string().uuid(), ...details }).parse(d),
   )
   .handler(async ({ data, context }) => {
     await guard(context.userId);
     const { updateCustomBadge } = await import("./custom-badges.server");
-    return updateCustomBadge(data.id, { name: data.name, description: data.description ?? null, imageUrl: data.imageUrl ?? null });
+    const { id, ...rest } = data;
+    return updateCustomBadge(id, rest);
   });
 
 export const adminDeleteCustomBadge = createServerFn({ method: "POST" })
@@ -97,13 +110,13 @@ export const adminUserCustomBadges = createServerFn({ method: "POST" })
 export const adminSetCustomBadge = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((d: unknown) =>
-    z.object({ userId: z.string().uuid(), badgeId: z.string().uuid(), granted: z.boolean() }).parse(d),
+    z.object({ userId: z.string().uuid(), badgeId: z.string().uuid(), granted: z.boolean(), reason: opt(200) }).parse(d),
   )
   .handler(async ({ data, context }) => {
     await guard(context.userId);
     const m = await import("./custom-badges.server");
     return data.granted
-      ? m.grantCustomBadge(data.userId, data.badgeId, context.userId)
+      ? m.grantCustomBadge(data.userId, data.badgeId, context.userId, data.reason ?? null)
       : m.revokeCustomBadge(data.userId, data.badgeId);
   });
 
