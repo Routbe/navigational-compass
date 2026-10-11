@@ -1,4 +1,5 @@
 import { NowPlaying, useNowPlaying } from "@/components/profile/NowPlaying";
+import { SnapchatProfile } from "@/components/profile/SnapchatProfile";
 import { ProfileIntegrations } from "@/components/profile/ProfileIntegrations";
 import { cn } from "@/lib/utils";
 import {
@@ -408,6 +409,7 @@ export function ProfileView({
           )}
         </h1>
         {!free && <CustomBadgeRow handle={profile.username} mutedColor={t.muted} />}
+        {profile.username && <SnapchatProfile handle={profile.username} theme={t} />}
         {profile.username && <NowPlaying handle={profile.username} theme={t} />}
         {profile.username && <ProfileIntegrations handle={profile.username} theme={t} />}
 

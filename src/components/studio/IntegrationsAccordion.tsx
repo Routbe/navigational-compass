@@ -16,6 +16,7 @@ import {
 } from "@/lib/integrations-catalog";
 import { normalizeIntegrationValue, type Audience } from "@/lib/integrations-rules";
 import { disconnectSpotifyPresence, setSpotifyPresenceScope, getMyPresence, setSpotifyPresenceVisible } from "@/lib/presence.functions";
+import { SnapchatPanel } from "@/components/studio/SnapchatPanel";
 import { getMyIntegrations, removeIntegration, saveIntegration } from "@/lib/integrations.functions";
 
 const SPOTIFY_MESSAGES: Record<string, [ok: boolean, text: string]> = {
@@ -172,6 +173,7 @@ export function IntegrationsAccordion() {
         <p className="text-sm text-muted-foreground">
           Koppel je diensten en toon live kaarten op je profiel. Kies per koppeling of ze op je Pro-, Social- of beide profielen verschijnt.
         </p>
+        <SnapchatPanel />
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]" role="tablist" aria-label="Categorie">
           {INTEGRATION_FILTERS.map((f) => (
             <button
