@@ -64,7 +64,7 @@ export const adminDeleteCustomBadge = createServerFn({ method: "POST" })
     return deleteCustomBadge(data.id);
   });
 
-/** Upload van een badge-afbeelding: Vercel Blob (BLOB_READ_WRITE_TOKEN), anders de interne bucket. */
+/** Upload van een badge-afbeelding: Scaleway Object Storage (publiek leesbaar), URL gaat naar Neon. */
 export const adminUploadBadgeImage = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((d: unknown) => z.object({ base64: z.string().min(16).max(2_800_000) }).parse(d))
@@ -75,18 +75,7 @@ export const adminUploadBadgeImage = createServerFn({ method: "POST" })
     const real = s.sniffType(bytes);
     if (!real || !(s.IMAGE_TYPES as readonly string[]).includes(real)) return { ok: false as const, message: "Gebruik PNG, JPG of WebP." };
     const key = `badges/custom/${crypto.randomUUID()}.${s.extFor(real)}`;
-    const blobToken = process.env["BLOB_READ_WRITE_TOKEN"];
-    if (blobToken) {
-      const { put } = await import("@vercel/blob");
-      const blob = await put(key, new Blob([bytes as BlobPart], { type: real }), {
-        access: "public",
-        contentType: real,
-        token: blobToken,
-        addRandomSuffix: false,
-      });
-      return { ok: true as const, url: blob.url };
-    }
-    if (!s.storageConfigured("internal")) return { ok: false as const, message: "Opslag is niet ingesteld (BLOB_READ_WRITE_TOKEN ontbreekt)." };
+    if (!s.storageConfigured("internal")) return { ok: false as const, message: "Opslag is niet ingesteld (S3_* variabelen ontbreken)." };
     await s.putObject("internal", key, bytes, { contentType: real, publicRead: true });
     return { ok: true as const, url: s.publicUrl("internal", key) };
   });

@@ -172,10 +172,13 @@ Live Presence (Studio → Verbindingen & Integraties). Create an app at develope
 ## Telegram
 Register the webhook once with `TELEGRAM_BOT_TOKEN=... bun scripts/telegram-set-webhook.ts https://rout.be` (secret token is derived from the bot token).
 
-## Vercel Blob (badge uploads)
-
-- `BLOB_READ_WRITE_TOKEN` — Vercel Blob store token. When set, admin badge/crest uploads go to Vercel Blob (public URL stored in Neon); otherwise the Scaleway internal bucket is used.
+- `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET_NAME`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` — Generic aliases for the Scaleway variables above (used when the SCALEWAY_* name is unset). Badge/crest uploads go here, public-read.
 
 ## Snapchat (Snap Kit)
 
 - `SNAPCHAT_CLIENT_ID`, `SNAPCHAT_CLIENT_SECRET` — Snap Kit Login Kit + Bitmoji Kit. Redirect URI: `<site>/api/public/snapchat/callback`. No location/Snap Map is ever used.
+
+## Deployment mode (admin split)
+
+- `VITE_APP_MODE` — `public` on rout.be (all /admin pages, /api/admin and admin server functions return 404/403), `admin` on rout.dlp.li (only portal + sign-in, no social login, noindex). Unset = everything served (preview).
+- `APP_MODE` — Optional server-side override of the same value.
