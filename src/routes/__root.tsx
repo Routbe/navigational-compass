@@ -20,6 +20,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LanguageSync } from "@/components/LanguageSync";
 import "@/lib/env";
+import { notFound, redirect } from "@tanstack/react-router";
+import { appMode, isAdminMode, modeDecision } from "@/lib/app-mode";
 
 function NotFoundComponent() {
   return (
@@ -82,8 +84,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Same split-brain decision as the server middleware, so client navigation obeys it too.
+  beforeLoad: ({ location }) => {
+    const d = modeDecision(appMode(), location.pathname);
+    if (d.kind === "notFound") throw notFound();
+    if (d.kind === "redirect") throw redirect({ href: d.to });
+  },
   head: () => ({
     meta: [
+      ...(isAdminMode() ? [{ name: "robots", content: "noindex, nofollow" }] : []),
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "ROUT — QR-codes en korte links met karakter" },
