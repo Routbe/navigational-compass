@@ -17,6 +17,9 @@ async function hasRole(userId: string, role: string): Promise<boolean> {
 
 /** Throws unless the caller holds the admin role. */
 export async function assertAdminRole(userId: string) {
+  // Public deployment (rout.be) never executes admin server functions.
+  const { isPublicMode } = await import("./app-mode");
+  if (isPublicMode()) throw new Error("Forbidden");
   if (!(await hasRole(userId, "admin"))) throw new Error("Forbidden");
 }
 

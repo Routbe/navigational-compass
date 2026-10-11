@@ -2,6 +2,7 @@ import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/r
 
 import { renderErrorPage } from "./lib/error-page";
 import { isStrictPath, securityHeaders, sessionCookieProblems } from "./lib/security-headers";
+import { appMode, modeDecision } from "./lib/app-mode";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -57,8 +58,28 @@ const securityHeadersMiddleware = createMiddleware().server(async ({ request, ne
   return result;
 });
 
+/**
+ * Split-brain gate (lib/app-mode.ts): public mode 404s every admin surface,
+ * admin mode serves only the portal, and admin responses are never indexed.
+ */
+const appModeMiddleware = createMiddleware().server(async ({ request, next }) => {
+  const mode = appMode();
+  if (mode === "all") return next();
+  const { pathname } = new URL(request.url);
+  const noindex = { "x-robots-tag": "noindex, nofollow", "cache-control": "no-store" };
+  if (mode === "admin" && pathname === "/robots.txt") {
+    return new Response("User-agent: *\nDisallow: /\n", { headers: { "content-type": "text/plain", ...noindex } });
+  }
+  const d = modeDecision(mode, pathname);
+  if (d.kind === "notFound") return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
+  if (d.kind === "redirect") return new Response(null, { status: 302, headers: { location: d.to, ...noindex } });
+  const result = await next();
+  if (mode === "admin") (result as { response?: Response }).response?.headers.set("x-robots-tag", "noindex, nofollow");
+  return result;
+});
+
 // Sessions are carried by the httpOnly `rout_session` cookie (Neon), so no
 // client-side token attacher is needed on server functions.
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorMiddleware, securityHeadersMiddleware, csrfMiddleware],
+  requestMiddleware: [errorMiddleware, appModeMiddleware, securityHeadersMiddleware, csrfMiddleware],
 }));

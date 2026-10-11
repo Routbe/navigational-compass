@@ -25,21 +25,22 @@ export class StorageNotConfigured extends Error {
 }
 
 function config() {
-  const accessKeyId = process.env["SCALEWAY_ACCESS_KEY"];
-  const secretAccessKey = process.env["SCALEWAY_SECRET_KEY"];
-  const region = process.env["SCALEWAY_REGION"] || "fr-par";
-  const endpoint = (process.env["SCALEWAY_ENDPOINT"] || `https://s3.${region}.scw.cloud`).replace(/\/$/, "");
+  // Generic S3_* names (Vercel) are accepted as aliases of the SCALEWAY_* names.
+  const accessKeyId = process.env["SCALEWAY_ACCESS_KEY"] || process.env["S3_ACCESS_KEY_ID"];
+  const secretAccessKey = process.env["SCALEWAY_SECRET_KEY"] || process.env["S3_SECRET_ACCESS_KEY"];
+  const region = process.env["SCALEWAY_REGION"] || process.env["S3_REGION"] || "fr-par";
+  const endpoint = (process.env["SCALEWAY_ENDPOINT"] || process.env["S3_ENDPOINT"] || `https://s3.${region}.scw.cloud`).replace(/\/$/, "");
   if (!accessKeyId || !secretAccessKey) return null;
   return { accessKeyId, secretAccessKey, region, endpoint };
 }
 
 export function storageConfigured(kind: BucketKind = "client"): boolean {
-  return Boolean(config() && (process.env[BUCKET_ENV[kind]] || process.env["SCALEWAY_DEFAULT_BUCKET"]));
+  return Boolean(config() && (process.env[BUCKET_ENV[kind]] || process.env["SCALEWAY_DEFAULT_BUCKET"] || process.env["S3_BUCKET_NAME"]));
 }
 
 function resolve(kind: BucketKind) {
   const cfg = config();
-  const bucket = process.env[BUCKET_ENV[kind]] || process.env["SCALEWAY_DEFAULT_BUCKET"];
+  const bucket = process.env[BUCKET_ENV[kind]] || process.env["SCALEWAY_DEFAULT_BUCKET"] || process.env["S3_BUCKET_NAME"];
   if (!cfg || !bucket) throw new StorageNotConfigured();
   const client = new AwsClient({
     accessKeyId: cfg.accessKeyId,
