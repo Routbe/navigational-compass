@@ -10,6 +10,8 @@ export const PROXY_HOSTS = [
   "secure.gravatar.com",
   "cdn.bsky.app",
   "wakatime.com",
+  "sdk.bitmoji.com",
+  "images.bitmoji.com",
 ];
 
 export function isAllowedProxyUrl(raw: string): URL | null {

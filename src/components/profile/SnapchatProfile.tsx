@@ -1,6 +1,7 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicSnapchat } from "@/lib/snapchat.functions";
+import { proxied } from "@/lib/image-proxy-rules";
 
 type T = { card: string; border: string; text: string; muted: string };
 
@@ -14,7 +15,7 @@ export function SnapchatProfile({ handle, theme }: { handle: string; theme: T })
     <div className="mt-3 flex w-full flex-col gap-2">
       {data.mood && (
         <div className="flex items-center gap-2 self-center rounded-full border px-3 py-1.5 text-sm" style={box}>
-          {data.mood.bitmojiUrl && <img src={data.mood.bitmojiUrl} alt="" className="h-6 w-6 object-contain" />}
+          {data.mood.bitmojiUrl && <img src={proxied(data.mood.bitmojiUrl) ?? ""} alt="" className="h-6 w-6 object-contain" />}
           <span>{data.mood.emoji}</span>
           <span>{data.mood.text}</span>
         </div>
@@ -22,7 +23,7 @@ export function SnapchatProfile({ handle, theme }: { handle: string; theme: T })
       {data.card && (
         <div className="flex items-center gap-3 rounded-2xl border p-3" style={box}>
           {data.card.bitmojiUrl ? (
-            <img src={data.card.bitmojiUrl} alt="Bitmoji" className="h-12 w-12 object-contain" />
+            <img src={proxied(data.card.bitmojiUrl) ?? ""} alt="Bitmoji" className="h-12 w-12 object-contain" />
           ) : (
             <span className="text-2xl" aria-hidden>👻</span>
           )}

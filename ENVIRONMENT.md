@@ -171,3 +171,11 @@ Live Presence (Studio → Verbindingen & Integraties). Create an app at develope
 
 ## Telegram
 Register the webhook once with `TELEGRAM_BOT_TOKEN=... bun scripts/telegram-set-webhook.ts https://rout.be` (secret token is derived from the bot token).
+
+## Vercel Blob (badge uploads)
+
+- `BLOB_READ_WRITE_TOKEN` — Vercel Blob store token. When set, admin badge/crest uploads go to Vercel Blob (public URL stored in Neon); otherwise the Scaleway internal bucket is used.
+
+## Snapchat (Snap Kit)
+
+- `SNAPCHAT_CLIENT_ID`, `SNAPCHAT_CLIENT_SECRET` — Snap Kit Login Kit + Bitmoji Kit. Redirect URI: `<site>/api/public/snapchat/callback`. No location/Snap Map is ever used.

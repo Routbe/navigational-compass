@@ -15,7 +15,7 @@ const SCOPES = [
   "https://auth.snapchat.com/oauth2/api/user.external_id",
 ].join(" ");
 const STATE_TTL_MS = 10 * 60 * 1000;
-const BITMOJI_HOST = /^https:\/\/([a-z0-9-]+\.)*(bitmoji\.com|snapchat\.com|sc-cdn\.net)\//i;
+const BITMOJI_HOST = /^https:\/\/(sdk|images)\.bitmoji\.com\//i;
 
 export function snapchatConfigured(): boolean {
   return Boolean(process.env["SNAPCHAT_CLIENT_ID"] && process.env["SNAPCHAT_CLIENT_SECRET"]);
