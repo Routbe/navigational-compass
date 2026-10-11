@@ -153,7 +153,43 @@ export type NowPlaying = {
   url?: string | null;
   progressMs?: number;
   durationMs?: number;
+  /** Server time (ms) at which progressMs was measured. */
+  syncedAt?: number;
 };
+
+const CACHE_FRESH_MS = 10_000;
+
+/** Cached read: visitors share one Spotify call per ~10 s per member. */
+export async function cachedNowPlaying(userId: string): Promise<NowPlaying> {
+  const rows = await sql`select *, extract(epoch from sync_timestamp) * 1000 as synced_ms
+    from public.user_music_status where user_id = ${userId}`;
+  const r = rows[0] as Record<string, unknown> | undefined;
+  const syncedMs = r ? Number(r["synced_ms"]) : 0;
+  if (r && Date.now() - syncedMs < CACHE_FRESH_MS) {
+    if (!r["is_playing"]) return { playing: false };
+    return {
+      playing: true,
+      title: (r["track_name"] as string) ?? undefined,
+      artist: (r["artist_name"] as string) ?? undefined,
+      image: (r["album_art_url"] as string) ?? null,
+      url: (r["external_url"] as string) ?? null,
+      progressMs: Number(r["progress_ms"] ?? 0),
+      durationMs: Number(r["duration_ms"] ?? 0),
+      syncedAt: syncedMs,
+    };
+  }
+  const live = await nowPlaying(userId);
+  const syncedAt = Date.now();
+  await sql`insert into public.user_music_status
+      (user_id, is_playing, track_name, artist_name, album_art_url, external_url, progress_ms, duration_ms, sync_timestamp, updated_at)
+    values (${userId}, ${live.playing}, ${live.title ?? null}, ${live.artist ?? null}, ${live.image ?? null}, ${live.url ?? null},
+      ${live.progressMs ?? null}, ${live.durationMs ?? null}, ${new Date(syncedAt).toISOString()}, now())
+    on conflict (user_id) do update set is_playing = excluded.is_playing, track_name = excluded.track_name,
+      artist_name = excluded.artist_name, album_art_url = excluded.album_art_url, external_url = excluded.external_url,
+      progress_ms = excluded.progress_ms, duration_ms = excluded.duration_ms,
+      sync_timestamp = excluded.sync_timestamp, updated_at = now()`.catch((e) => console.error("[music-cache]", e));
+  return { ...live, syncedAt };
+}
 
 /** Only public track info; never tokens or account details. */
 export async function nowPlaying(userId: string): Promise<NowPlaying> {
@@ -207,6 +243,7 @@ export async function setSpotifyScope(userId: string, scope: { verified: boolean
 }
 
 export async function disconnectSpotify(userId: string) {
+  await sql`delete from public.user_music_status where user_id = ${userId}`;
   await sql`delete from public.user_presence_connections where user_id = ${userId} and provider = 'spotify'`;
 }
 
