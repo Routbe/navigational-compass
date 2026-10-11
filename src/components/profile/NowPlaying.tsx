@@ -10,6 +10,7 @@ type NowPlayingData = {
   url?: string | null;
   progressMs?: number;
   durationMs?: number;
+  syncedAt?: number;
 };
 
 type Theme = { card: string; border: string; text: string; muted: string };
@@ -22,7 +23,9 @@ export function useNowPlaying(handle: string | null | undefined) {
     queryFn: async (): Promise<NowPlayingData & { fetchedAt: number }> => {
       const r = await fetch(`/api/presence/now-playing?handle=${encodeURIComponent(handle!)}`);
       const d: NowPlayingData = r.ok ? await r.json() : { playing: false };
-      return { ...d, fetchedAt: Date.now() };
+      // Anchor on the server's sync time, corrected for clock skew via the response's own arrival.
+      const fetchedAt = d.syncedAt ? Math.min(Date.now(), d.syncedAt) : Date.now();
+      return { ...d, fetchedAt };
     },
     refetchInterval: 20_000,
     staleTime: 10_000,
@@ -55,9 +58,10 @@ function useLiveProgress(d: (NowPlayingData & { fetchedAt: number }) | undefined
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [d?.playing]);
-  if (!d?.playing || !d.durationMs) return { pos: 0, ratio: 0 };
-  const pos = Math.min(d.durationMs, (d.progressMs ?? 0) + (now - d.fetchedAt));
-  return { pos, ratio: pos / d.durationMs };
+  if (!d?.playing || !d.durationMs) return { pos: 0, ratio: 0, ended: false };
+  const raw = (d.progressMs ?? 0) + (now - d.fetchedAt);
+  const pos = Math.min(d.durationMs, raw);
+  return { pos, ratio: pos / d.durationMs, ended: raw >= d.durationMs };
 }
 
 function Waveform({ seed, ratio, color, muted }: { seed: string; ratio: number; color: string; muted: string }) {
@@ -100,8 +104,14 @@ function Waveform({ seed, ratio, color, muted }: { seed: string; ratio: number; 
 export function NowPlaying({ handle, theme }: { handle: string; theme: Theme }) {
   const q = useNowPlaying(handle);
   const d = q.data;
-  const { pos, ratio } = useLiveProgress(d);
+  const { pos, ratio, ended } = useLiveProgress(d);
   const [open, setOpen] = useState(false);
+  // End of track: fetch the next song once instead of waiting for the next poll.
+  useEffect(() => {
+    if (!ended) return;
+    const t = setTimeout(() => void q.refetch(), 1500);
+    return () => clearTimeout(t);
+  }, [ended, d?.title]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!d?.playing) return null;
   const art = proxied(d.image);
   const seed = `${d.title}·${d.artist}`;
@@ -124,7 +134,7 @@ export function NowPlaying({ handle, theme }: { handle: string; theme: Theme }) 
       {artwork("h-16 w-16")}
       <div className="min-w-0 flex-1 text-left">
         <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider" style={{ color: theme.muted }}>
-          <span className="now-playing-bars" aria-hidden><i /><i /><i /></span> Nu aan het luisteren
+          <span className="now-playing-bars" aria-hidden><i /><i /><i /></span> {ended ? "Volgend nummer laden…" : "Nu aan het luisteren"}
         </span>
         <span className="block truncate text-sm font-semibold">{d.title}</span>
         <span className="block truncate text-xs" style={{ color: theme.muted }}>{d.artist}</span>

@@ -9,3 +9,9 @@
 - [x] H: Wachtwoord/2FA zonder wachtwoord via e-mailcode
 - [x] I: Account samenvoegen (handle/ontwerp kiezen, e-mailcode, alles samen)
 - [x] J: Opgeslagen kaartontwerpen
+
+## Open (uit specificaties)
+- [ ] Badges: badges/user_badges/badge_issuers + /admin/badges + badge-popup op profiel
+- [ ] Snapchat Login Kit + Bitmoji-picker + Snapchat-kaart + status/mood (wacht op Snap Kit client ID/secret)
+- [ ] Admin-portaal split (APP_MODE, rout.dlp.li, noindex)
+- [ ] Testsuite account-merge / security-code / sms-provider / telegram

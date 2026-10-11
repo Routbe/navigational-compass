@@ -9,14 +9,14 @@ export const Route = createFileRoute("/api_/presence/now-playing")({
         const limited = guardRequest(request, "now-playing", 120, 60000);
         if (limited) return limited;
         const handle = (new URL(request.url).searchParams.get("handle") ?? "").replace(/^@/, "").slice(0, 64);
-        const headers = { "cache-control": "public, max-age=15" };
+        const headers = { "cache-control": "public, max-age=5" };
         if (!handle) return Response.json({ playing: false }, { headers });
         try {
           const s = await import("@/lib/spotify-presence.server");
           if (!s.spotifyConfigured()) return Response.json({ playing: false }, { headers });
           const owner = await s.publicSpotifyOwner(handle);
           if (!owner) return Response.json({ playing: false }, { headers });
-          return Response.json(await s.nowPlaying(owner), { headers });
+          return Response.json(await s.cachedNowPlaying(owner), { headers });
         } catch (e) {
           console.error("[now-playing]", e instanceof Error ? e.message : e);
           return Response.json({ playing: false }, { headers });
