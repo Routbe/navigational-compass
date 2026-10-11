@@ -64,7 +64,7 @@ export const adminDeleteCustomBadge = createServerFn({ method: "POST" })
     return deleteCustomBadge(data.id);
   });
 
-/** Upload van een badge-afbeelding naar de interne bucket (ROUT-asset). */
+/** Upload van een badge-afbeelding: Vercel Blob (BLOB_READ_WRITE_TOKEN), anders de interne bucket. */
 export const adminUploadBadgeImage = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((d: unknown) => z.object({ base64: z.string().min(16).max(2_800_000) }).parse(d))
@@ -74,8 +74,19 @@ export const adminUploadBadgeImage = createServerFn({ method: "POST" })
     const bytes = s.base64ToBytes(data.base64);
     const real = s.sniffType(bytes);
     if (!real || !(s.IMAGE_TYPES as readonly string[]).includes(real)) return { ok: false as const, message: "Gebruik PNG, JPG of WebP." };
-    if (!s.storageConfigured("internal")) return { ok: false as const, message: "Opslag is niet ingesteld." };
     const key = `badges/custom/${crypto.randomUUID()}.${s.extFor(real)}`;
+    const blobToken = process.env["BLOB_READ_WRITE_TOKEN"];
+    if (blobToken) {
+      const { put } = await import("@vercel/blob");
+      const blob = await put(key, new Blob([bytes as BlobPart], { type: real }), {
+        access: "public",
+        contentType: real,
+        token: blobToken,
+        addRandomSuffix: false,
+      });
+      return { ok: true as const, url: blob.url };
+    }
+    if (!s.storageConfigured("internal")) return { ok: false as const, message: "Opslag is niet ingesteld (BLOB_READ_WRITE_TOKEN ontbreekt)." };
     await s.putObject("internal", key, bytes, { contentType: real, publicRead: true });
     return { ok: true as const, url: s.publicUrl("internal", key) };
   });
