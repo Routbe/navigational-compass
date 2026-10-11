@@ -13,6 +13,8 @@ export type IntegrationStatus = {
   subtitle?: string;
   url?: string;
   image?: string | null;
+  /** Chess cards: Blitz/Rapid ratings, live status (Lichess) and challenge link. */
+  chess?: { blitz?: number | null; rapid?: number | null; online?: boolean | null; challengeUrl?: string; username?: string };
 };
 
 export type MyIntegration = {
@@ -28,6 +30,8 @@ export type MyIntegration = {
 export type PublicIntegration = MyIntegration & { status: IntegrationStatus | null };
 
 const STATUS_TTL_MS = 10 * 60 * 1000;
+/** Chess cards show live status, so they refresh more often. */
+const CHESS_TTL_MS = 2 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 6000;
 
 function toMine(r: Row): MyIntegration {
@@ -199,9 +203,59 @@ export async function fetchStatus(provider: string, handle: string): Promise<Int
         return null;
       }
     }
+    case "lichess": {
+      const j = (await getJson(`https://lichess.org/api/user/${encodeURIComponent(handle)}`, { accept: "application/json" })) as
+        | { username?: string; title?: string; online?: boolean; disabled?: boolean; perfs?: Record<string, { rating?: number }> }
+        | null;
+      if (!j?.username || j.disabled) return null;
+      return {
+        title: `${j.title ? `${j.title} ` : ""}${j.username}`,
+        subtitle: chessLine(j.perfs?.blitz?.rating, j.perfs?.rapid?.rating),
+        url: `https://lichess.org/@/${j.username}`,
+        image: null,
+        chess: {
+          username: j.username,
+          blitz: j.perfs?.blitz?.rating ?? null,
+          rapid: j.perfs?.rapid?.rating ?? null,
+          online: Boolean(j.online),
+          challengeUrl: `https://lichess.org/?user=${encodeURIComponent(j.username)}#friend`,
+        },
+      };
+    }
+    case "chesscom": {
+      const id = handle.toLowerCase();
+      const [p, s] = (await Promise.all([
+        getJson(`https://api.chess.com/pub/player/${encodeURIComponent(id)}`),
+        getJson(`https://api.chess.com/pub/player/${encodeURIComponent(id)}/stats`),
+      ])) as [
+        { username?: string; title?: string; avatar?: string; url?: string } | null,
+        { chess_blitz?: { last?: { rating?: number } }; chess_rapid?: { last?: { rating?: number } } } | null,
+      ];
+      if (!p?.username) return null;
+      const blitz = s?.chess_blitz?.last?.rating ?? null;
+      const rapid = s?.chess_rapid?.last?.rating ?? null;
+      return {
+        title: `${p.title ? `${p.title} ` : ""}${p.username}`,
+        subtitle: chessLine(blitz, rapid),
+        url: p.url ?? `https://www.chess.com/member/${id}`,
+        image: p.avatar ?? null,
+        chess: {
+          username: p.username,
+          blitz,
+          rapid,
+          online: null,
+          challengeUrl: `https://www.chess.com/play/online/new?opponent=${encodeURIComponent(id)}`,
+        },
+      };
+    }
     default:
       return null;
   }
+}
+
+function chessLine(blitz?: number | null, rapid?: number | null): string | undefined {
+  const parts = [blitz ? `Blitz ${blitz}` : "", rapid ? `Rapid ${rapid}` : ""].filter(Boolean);
+  return parts.length ? parts.join(" · ") : undefined;
 }
 
 function decodeXml(s: string): string {
@@ -265,7 +319,8 @@ export async function publicIntegrations(handle: string, mode: "pro" | "social" 
       let status = (row["status_json"] as IntegrationStatus | null) ?? null;
       const at = row["status_at"] ? Date.parse(String(row["status_at"])) : 0;
       const item = integrationById(m.provider);
-      if (item?.mode === "handle" && Date.now() - at > STATUS_TTL_MS) {
+      const ttl = m.provider === "lichess" || m.provider === "chesscom" ? CHESS_TTL_MS : STATUS_TTL_MS;
+      if (item?.mode === "handle" && Date.now() - at > ttl) {
         const fresh = await fetchStatus(m.provider, m.handle);
         if (fresh) {
           status = fresh;

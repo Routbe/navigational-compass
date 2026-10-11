@@ -20,6 +20,11 @@ export function normalizeIntegrationValue(provider: string, raw: string): string
       const h = v.replace(/^@/, "").replace(/^https?:\/\/[^/]+\//, "").replace(/\/.*$/, "");
       return USER.test(h) ? h : null;
     }
+    case "chesscom":
+    case "lichess": {
+      const h = v.replace(/^@/, "").replace(/^https?:\/\/(www\.)?(chess\.com\/member|lichess\.org\/@)\//i, "").replace(/\/.*$/, "");
+      return /^[A-Za-z0-9][A-Za-z0-9_-]{1,29}$/.test(h) ? h : null;
+    }
     case "bluesky":
     case "wsocial": {
       let h = v.toLowerCase().replace(/^@/, "").replace(/^https?:\/\/(www\.)?(bsky\.app|wsocial\.eu)\/profile\//, "").replace(/\/.*$/, "");
