@@ -26,6 +26,22 @@ async function q(body: unknown): Promise<any> {
   return JSON.parse(text);
 }
 
+/** Split on top-level semicolons, respecting $$-quoted bodies, strings and -- comments. */
+export function splitSql(src: string): string[] {
+  const out: string[] = [];
+  let cur = "", i = 0, dollar = false, str = false;
+  while (i < src.length) {
+    const c = src[i]!, two = src.slice(i, i + 2);
+    if (!dollar && !str && two === "--") { const e = src.indexOf("\n", i); i = e < 0 ? src.length : e; continue; }
+    if (!str && two === "$$") { dollar = !dollar; cur += two; i += 2; continue; }
+    if (!dollar && c === "'") str = !str;
+    if (!dollar && !str && c === ";") { if (cur.trim()) out.push(cur.trim()); cur = ""; i++; continue; }
+    cur += c; i++;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+
 const dryRun = process.argv.includes("--dry-run");
 const dir = join(import.meta.dir, "..", "db");
 const files = readdirSync(dir).filter((f) => /^\d+_.*\.sql$/.test(f)).sort();
@@ -38,7 +54,7 @@ for (const file of files) {
   const checksum = createHash("sha256").update(body).digest("hex");
   try {
     await q({ queries: [
-      { query: body, params: [] },
+      ...splitSql(body).map((query) => ({ query, params: [] })),
       { query: "insert into public.schema_migrations (filename, checksum) values ($1, $2)", params: [file, checksum] },
     ] });
     console.log(`✓ ${file}`);
