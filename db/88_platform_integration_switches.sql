@@ -9,5 +9,4 @@ create table if not exists public.platform_integration_switches (
   updated_at  timestamptz not null default now()
 );
 
-grant all on public.platform_integration_switches to service_role;
 alter table public.platform_integration_switches enable row level security;
