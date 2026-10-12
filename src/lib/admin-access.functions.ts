@@ -9,6 +9,11 @@ const permissionSchema = z.enum([
   "view_device_data",
   "block_features",
   "manage_admins",
+  "approve_sepa",
+  "grant_badges",
+  "manage_integrations",
+  "review_apps",
+  "export_data",
 ]);
 
 const featureSchema = z.enum([
