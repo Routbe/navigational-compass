@@ -18,6 +18,11 @@ export const ADMIN_PERMISSIONS = [
   "view_device_data",
   "block_features",
   "manage_admins",
+  "approve_sepa",
+  "grant_badges",
+  "manage_integrations",
+  "review_apps",
+  "export_data",
 ] as const;
 
 export type AdminPermission = (typeof ADMIN_PERMISSIONS)[number];

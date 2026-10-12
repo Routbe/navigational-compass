@@ -275,6 +275,11 @@ export async function saveMine(
 ): Promise<MyIntegration> {
   const item = integrationById(input.provider);
   if (!item || item.mode === "soon" || item.mode === "oauth") throw new Error("unsupported_provider");
+  {
+    const { readSwitches } = await import("./integration-switches.server");
+    const { mayLink } = await import("./integration-switches");
+    if (!mayLink(await readSwitches(), input.provider)) throw new Error("integration_disabled");
+  }
   const sso = item.sso || input.provider === "wsocial" ? await ssoHandles(userId) : {};
   const ssoHandle = sso[input.provider];
   const handle = input.useSso && ssoHandle ? ssoHandle : normalizeIntegrationValue(input.provider, input.handle ?? "");
@@ -313,14 +318,19 @@ export async function publicIntegrations(handle: string, mode: "pro" | "social" 
        and case when lower(a.handle) = lower(${handle}) then i.show_on_alias else i.show_on_verified end
      order by i.created_at
      limit 40`) as Row[];
-  const shown = visibleForMode(rows.map((r) => ({ ...toMine(r), row: r })), mode);
+  const { readSwitches } = await import("./integration-switches.server");
+  const { isShownPublicly, mayFetchLive } = await import("./integration-switches");
+  const switches = await readSwitches();
+  const shown = visibleForMode(rows.map((r) => ({ ...toMine(r), row: r })), mode).filter((m) =>
+    isShownPublicly(switches, m.provider),
+  );
   return Promise.all(
     shown.map(async ({ row, ...m }) => {
       let status = (row["status_json"] as IntegrationStatus | null) ?? null;
       const at = row["status_at"] ? Date.parse(String(row["status_at"])) : 0;
       const item = integrationById(m.provider);
       const ttl = m.provider === "lichess" || m.provider === "chesscom" ? CHESS_TTL_MS : STATUS_TTL_MS;
-      if (item?.mode === "handle" && Date.now() - at > ttl) {
+      if (item?.mode === "handle" && mayFetchLive(switches, m.provider) && Date.now() - at > ttl) {
         const fresh = await fetchStatus(m.provider, m.handle);
         if (fresh) {
           status = fresh;

@@ -71,12 +71,15 @@ import { Route as ReviewTokenRouteImport } from './routes/review.$token'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as StatsTokenRouteImport } from './routes/stats.$token'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminContactRouteImport } from './routes/_authenticated/admin.contact'
 import { Route as AuthenticatedAdminCustomBadgesRouteImport } from './routes/_authenticated/admin.custom-badges'
 import { Route as AuthenticatedAdminGiftCardsRouteImport } from './routes/_authenticated/admin.gift-cards'
+import { Route as AuthenticatedAdminIntegrationsRouteImport } from './routes/_authenticated/admin.integrations'
 import { Route as AuthenticatedAdminOpsRouteImport } from './routes/_authenticated/admin.ops'
 import { Route as AuthenticatedAdminSepaRouteImport } from './routes/_authenticated/admin.sepa'
 import { Route as AuthenticatedAdminSubdomainsRouteImport } from './routes/_authenticated/admin.subdomains'
+import { Route as AuthenticatedAdminTeamRouteImport } from './routes/_authenticated/admin.team'
 import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_authenticated/admin.verifications'
 import { Route as AuthenticatedAdminWebhooksRouteImport } from './routes/_authenticated/admin.webhooks'
 import { Route as AuthenticatedConsoleIndexRouteImport } from './routes/_authenticated/console.index'
@@ -463,6 +466,11 @@ const UUsernameRoute = UUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminContactRoute =
   AuthenticatedAdminContactRouteImport.update({
     id: '/contact',
@@ -481,6 +489,12 @@ const AuthenticatedAdminGiftCardsRoute =
     path: '/gift-cards',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminIntegrationsRoute =
+  AuthenticatedAdminIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminOpsRoute = AuthenticatedAdminOpsRouteImport.update({
   id: '/ops',
   path: '/ops',
@@ -497,6 +511,11 @@ const AuthenticatedAdminSubdomainsRoute =
     path: '/subdomains',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminTeamRoute = AuthenticatedAdminTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminVerificationsRoute =
   AuthenticatedAdminVerificationsRouteImport.update({
     id: '/verifications',
@@ -982,9 +1001,11 @@ export interface FileRoutesByFullPath {
   '/admin/contact': typeof AuthenticatedAdminContactRoute
   '/admin/custom-badges': typeof AuthenticatedAdminCustomBadgesRoute
   '/admin/gift-cards': typeof AuthenticatedAdminGiftCardsRoute
+  '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
   '/admin/ops': typeof AuthenticatedAdminOpsRoute
   '/admin/sepa': typeof AuthenticatedAdminSepaRoute
   '/admin/subdomains': typeof AuthenticatedAdminSubdomainsRoute
+  '/admin/team': typeof AuthenticatedAdminTeamRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/console/api': typeof AuthenticatedConsoleApiRoute
@@ -1014,6 +1035,7 @@ export interface FileRoutesByFullPath {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/console/': typeof AuthenticatedConsoleIndexRoute
   '/console/apps/$appId': typeof AuthenticatedConsoleAppsAppIdRouteWithChildren
   '/console/apps/new': typeof AuthenticatedConsoleAppsNewRoute
@@ -1099,7 +1121,6 @@ export interface FileRoutesByTo {
   '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
   '/.well-known/jwks.json': typeof DotwellKnownJwksDotjsonRoute
   '/.well-known/openid-configuration': typeof DotwellKnownOpenidConfigurationRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/domains': typeof AuthenticatedDomainsRoute
   '/my-data': typeof AuthenticatedMyDataRoute
@@ -1124,9 +1145,11 @@ export interface FileRoutesByTo {
   '/admin/contact': typeof AuthenticatedAdminContactRoute
   '/admin/custom-badges': typeof AuthenticatedAdminCustomBadgesRoute
   '/admin/gift-cards': typeof AuthenticatedAdminGiftCardsRoute
+  '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
   '/admin/ops': typeof AuthenticatedAdminOpsRoute
   '/admin/sepa': typeof AuthenticatedAdminSepaRoute
   '/admin/subdomains': typeof AuthenticatedAdminSubdomainsRoute
+  '/admin/team': typeof AuthenticatedAdminTeamRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/console/api': typeof AuthenticatedConsoleApiRoute
@@ -1155,6 +1178,7 @@ export interface FileRoutesByTo {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/console': typeof AuthenticatedConsoleIndexRoute
   '/console/apps/new': typeof AuthenticatedConsoleAppsNewRoute
   '/api/public/auth/providers': typeof ApiPublicAuthProvidersRoute
@@ -1268,9 +1292,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/contact': typeof AuthenticatedAdminContactRoute
   '/_authenticated/admin/custom-badges': typeof AuthenticatedAdminCustomBadgesRoute
   '/_authenticated/admin/gift-cards': typeof AuthenticatedAdminGiftCardsRoute
+  '/_authenticated/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
   '/_authenticated/admin/ops': typeof AuthenticatedAdminOpsRoute
   '/_authenticated/admin/sepa': typeof AuthenticatedAdminSepaRoute
   '/_authenticated/admin/subdomains': typeof AuthenticatedAdminSubdomainsRoute
+  '/_authenticated/admin/team': typeof AuthenticatedAdminTeamRoute
   '/_authenticated/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/_authenticated/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
   '/_authenticated/console/api': typeof AuthenticatedConsoleApiRoute
@@ -1300,6 +1326,7 @@ export interface FileRoutesById {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/console/': typeof AuthenticatedConsoleIndexRoute
   '/_authenticated/console/apps/$appId': typeof AuthenticatedConsoleAppsAppIdRouteWithChildren
   '/_authenticated/console/apps/new': typeof AuthenticatedConsoleAppsNewRoute
@@ -1414,9 +1441,11 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/custom-badges'
     | '/admin/gift-cards'
+    | '/admin/integrations'
     | '/admin/ops'
     | '/admin/sepa'
     | '/admin/subdomains'
+    | '/admin/team'
     | '/admin/verifications'
     | '/admin/webhooks'
     | '/console/api'
@@ -1446,6 +1475,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/admin/'
     | '/console/'
     | '/console/apps/$appId'
     | '/console/apps/new'
@@ -1531,7 +1561,6 @@ export interface FileRouteTypes {
     | '/.well-known/atproto-did'
     | '/.well-known/jwks.json'
     | '/.well-known/openid-configuration'
-    | '/admin'
     | '/dashboard'
     | '/domains'
     | '/my-data'
@@ -1556,9 +1585,11 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/custom-badges'
     | '/admin/gift-cards'
+    | '/admin/integrations'
     | '/admin/ops'
     | '/admin/sepa'
     | '/admin/subdomains'
+    | '/admin/team'
     | '/admin/verifications'
     | '/admin/webhooks'
     | '/console/api'
@@ -1587,6 +1618,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/admin'
     | '/console'
     | '/console/apps/new'
     | '/api/public/auth/providers'
@@ -1699,9 +1731,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/contact'
     | '/_authenticated/admin/custom-badges'
     | '/_authenticated/admin/gift-cards'
+    | '/_authenticated/admin/integrations'
     | '/_authenticated/admin/ops'
     | '/_authenticated/admin/sepa'
     | '/_authenticated/admin/subdomains'
+    | '/_authenticated/admin/team'
     | '/_authenticated/admin/verifications'
     | '/_authenticated/admin/webhooks'
     | '/_authenticated/console/api'
@@ -1731,6 +1765,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/_authenticated/admin/'
     | '/_authenticated/console/'
     | '/_authenticated/console/apps/$appId'
     | '/_authenticated/console/apps/new'
@@ -2312,6 +2347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/contact': {
       id: '/_authenticated/admin/contact'
       path: '/contact'
@@ -2333,6 +2375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminGiftCardsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/integrations': {
+      id: '/_authenticated/admin/integrations'
+      path: '/integrations'
+      fullPath: '/admin/integrations'
+      preLoaderRoute: typeof AuthenticatedAdminIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/ops': {
       id: '/_authenticated/admin/ops'
       path: '/ops'
@@ -2352,6 +2401,13 @@ declare module '@tanstack/react-router' {
       path: '/subdomains'
       fullPath: '/admin/subdomains'
       preLoaderRoute: typeof AuthenticatedAdminSubdomainsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/team': {
+      id: '/_authenticated/admin/team'
+      path: '/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AuthenticatedAdminTeamRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/verifications': {
@@ -2902,22 +2958,28 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminContactRoute: typeof AuthenticatedAdminContactRoute
   AuthenticatedAdminCustomBadgesRoute: typeof AuthenticatedAdminCustomBadgesRoute
   AuthenticatedAdminGiftCardsRoute: typeof AuthenticatedAdminGiftCardsRoute
+  AuthenticatedAdminIntegrationsRoute: typeof AuthenticatedAdminIntegrationsRoute
   AuthenticatedAdminOpsRoute: typeof AuthenticatedAdminOpsRoute
   AuthenticatedAdminSepaRoute: typeof AuthenticatedAdminSepaRoute
   AuthenticatedAdminSubdomainsRoute: typeof AuthenticatedAdminSubdomainsRoute
+  AuthenticatedAdminTeamRoute: typeof AuthenticatedAdminTeamRoute
   AuthenticatedAdminVerificationsRoute: typeof AuthenticatedAdminVerificationsRoute
   AuthenticatedAdminWebhooksRoute: typeof AuthenticatedAdminWebhooksRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminContactRoute: AuthenticatedAdminContactRoute,
   AuthenticatedAdminCustomBadgesRoute: AuthenticatedAdminCustomBadgesRoute,
   AuthenticatedAdminGiftCardsRoute: AuthenticatedAdminGiftCardsRoute,
+  AuthenticatedAdminIntegrationsRoute: AuthenticatedAdminIntegrationsRoute,
   AuthenticatedAdminOpsRoute: AuthenticatedAdminOpsRoute,
   AuthenticatedAdminSepaRoute: AuthenticatedAdminSepaRoute,
   AuthenticatedAdminSubdomainsRoute: AuthenticatedAdminSubdomainsRoute,
+  AuthenticatedAdminTeamRoute: AuthenticatedAdminTeamRoute,
   AuthenticatedAdminVerificationsRoute: AuthenticatedAdminVerificationsRoute,
   AuthenticatedAdminWebhooksRoute: AuthenticatedAdminWebhooksRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =

@@ -1,17 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
-import Page from "@/pages/Admin";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { AdminPortalContext } from "@/components/admin/AdminPortalNav";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({
-    meta: [
-      { title: "Beheer | ROUT" },
-      { name: "description", content: "Beheer je ROUT-account, links en QR-codes." },
-      { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: "Beheer | ROUT" },
-      { property: "og:description", content: "Beheer je ROUT-account, links en QR-codes." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Page,
+  component: AdminPortalLayout,
 });
+
+function AdminPortalLayout() {
+  return (
+    <AdminPortalContext.Provider value={true}>
+      <Outlet />
+    </AdminPortalContext.Provider>
+  );
+}
