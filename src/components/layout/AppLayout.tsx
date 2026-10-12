@@ -14,6 +14,7 @@ import { MobileMenu } from "@/components/MobileMenu";
 import { LanguageToggle } from "@/components/LanguageToggle";
 
 import { cn } from "@/lib/utils";
+import { AdminPortalNav, useInAdminPortal } from "@/components/admin/AdminPortalNav";
 import { useHeaderReveal } from "@/hooks/useHeaderReveal";
 
 export interface Crumb {
@@ -51,6 +52,7 @@ export function AppLayout({
 }: AppLayoutProps) {
   const hidden = useHeaderReveal();
   const { t } = useTranslation();
+  const inPortal = useInAdminPortal();
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header
@@ -78,10 +80,15 @@ export function AppLayout({
         </div>
       </header>
 
-      <main className="flex-1 pt-16">
+      <main className={cn("flex-1 pt-16", inPortal && "lg:flex")}>
+        {inPortal ? (
+          <aside className="border-b border-border/50 px-4 py-4 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:w-64 lg:shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r">
+            <AdminPortalNav />
+          </aside>
+        ) : null}
         <div
           className={cn(
-            "mx-auto w-full",
+            "mx-auto w-full min-w-0",
             width === "full" ? "max-w-full" : "px-4 py-8 sm:px-6",
             width === "wide" ? "max-w-7xl" : width === "default" ? "max-w-5xl" : "",
           )}

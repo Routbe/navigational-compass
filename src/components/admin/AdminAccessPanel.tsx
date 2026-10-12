@@ -42,7 +42,20 @@ const PERMISSIONS = [
   { key: "view_device_data", label: "Locatie & toestel bekijken" },
   { key: "block_features", label: "Functies blokkeren" },
   { key: "manage_admins", label: "Admins beheren" },
+  { key: "approve_sepa", label: "SEPA goedkeuren" },
+  { key: "grant_badges", label: "Wapenschilden toekennen" },
+  { key: "manage_integrations", label: "Koppelingen schakelen" },
+  { key: "review_apps", label: "OAuth-apps beoordelen" },
+  { key: "export_data", label: "Gegevens exporteren" },
 ] as const;
+
+/** One-click role templates; they only toggle the permissions above. */
+const ROLE_TEMPLATES: { label: string; perms: (typeof PERMISSIONS)[number]["key"][] }[] = [
+  { label: "Compliance", perms: ["verify_users", "edit_names", "view_device_data"] },
+  { label: "Moderator", perms: ["grant_badges", "block_features"] },
+  { label: "Financieel", perms: ["approve_sepa", "export_data"] },
+  { label: "Developer Relations", perms: ["review_apps", "manage_integrations"] },
+];
 
 const FEATURES = [
   { key: "handle_change", label: "Gebruikersnaam wijzigen" },
