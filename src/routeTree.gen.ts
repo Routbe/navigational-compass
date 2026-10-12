@@ -48,7 +48,6 @@ import { Route as UsernameTipRouteImport } from './routes/$username.tip'
 import { Route as DotwellKnownAtprotoDidRouteImport } from './routes/[.]well-known.atproto-did'
 import { Route as DotwellKnownJwksDotjsonRouteImport } from './routes/[.]well-known.jwks[.]json'
 import { Route as DotwellKnownOpenidConfigurationRouteImport } from './routes/[.]well-known.openid-configuration'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedConsoleRouteImport } from './routes/_authenticated/console'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDomainsRouteImport } from './routes/_authenticated/domains'
@@ -71,6 +70,7 @@ import { Route as ReviewTokenRouteImport } from './routes/review.$token'
 import { Route as SSlugRouteImport } from './routes/s.$slug'
 import { Route as StatsTokenRouteImport } from './routes/stats.$token'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminContactRouteImport } from './routes/_authenticated/admin.contact'
 import { Route as AuthenticatedAdminCustomBadgesRouteImport } from './routes/_authenticated/admin.custom-badges'
 import { Route as AuthenticatedAdminGiftCardsRouteImport } from './routes/_authenticated/admin.gift-cards'
@@ -348,11 +348,6 @@ const DotwellKnownOpenidConfigurationRoute =
     path: '/.well-known/openid-configuration',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedConsoleRoute = AuthenticatedConsoleRouteImport.update({
   id: '/console',
   path: '/console',
@@ -463,51 +458,56 @@ const UUsernameRoute = UUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminContactRoute =
   AuthenticatedAdminContactRouteImport.update({
-    id: '/contact',
-    path: '/contact',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/admin/contact',
+    path: '/admin/contact',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminCustomBadgesRoute =
   AuthenticatedAdminCustomBadgesRouteImport.update({
-    id: '/custom-badges',
-    path: '/custom-badges',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/admin/custom-badges',
+    path: '/admin/custom-badges',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminGiftCardsRoute =
   AuthenticatedAdminGiftCardsRouteImport.update({
-    id: '/gift-cards',
-    path: '/gift-cards',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/admin/gift-cards',
+    path: '/admin/gift-cards',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminOpsRoute = AuthenticatedAdminOpsRouteImport.update({
-  id: '/ops',
-  path: '/ops',
-  getParentRoute: () => AuthenticatedAdminRoute,
+  id: '/admin/ops',
+  path: '/admin/ops',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAdminSepaRoute = AuthenticatedAdminSepaRouteImport.update({
-  id: '/sepa',
-  path: '/sepa',
-  getParentRoute: () => AuthenticatedAdminRoute,
+  id: '/admin/sepa',
+  path: '/admin/sepa',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAdminSubdomainsRoute =
   AuthenticatedAdminSubdomainsRouteImport.update({
-    id: '/subdomains',
-    path: '/subdomains',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/admin/subdomains',
+    path: '/admin/subdomains',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminVerificationsRoute =
   AuthenticatedAdminVerificationsRouteImport.update({
-    id: '/verifications',
-    path: '/verifications',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/admin/verifications',
+    path: '/admin/verifications',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminWebhooksRoute =
   AuthenticatedAdminWebhooksRouteImport.update({
-    id: '/webhooks',
-    path: '/webhooks',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/admin/webhooks',
+    path: '/admin/webhooks',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedConsoleIndexRoute =
   AuthenticatedConsoleIndexRouteImport.update({
@@ -956,7 +956,6 @@ export interface FileRoutesByFullPath {
   '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
   '/.well-known/jwks.json': typeof DotwellKnownJwksDotjsonRoute
   '/.well-known/openid-configuration': typeof DotwellKnownOpenidConfigurationRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/console': typeof AuthenticatedConsoleRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/domains': typeof AuthenticatedDomainsRoute
@@ -1014,6 +1013,7 @@ export interface FileRoutesByFullPath {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/console/': typeof AuthenticatedConsoleIndexRoute
   '/console/apps/$appId': typeof AuthenticatedConsoleAppsAppIdRouteWithChildren
   '/console/apps/new': typeof AuthenticatedConsoleAppsNewRoute
@@ -1099,7 +1099,6 @@ export interface FileRoutesByTo {
   '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
   '/.well-known/jwks.json': typeof DotwellKnownJwksDotjsonRoute
   '/.well-known/openid-configuration': typeof DotwellKnownOpenidConfigurationRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/domains': typeof AuthenticatedDomainsRoute
   '/my-data': typeof AuthenticatedMyDataRoute
@@ -1155,6 +1154,7 @@ export interface FileRoutesByTo {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/console': typeof AuthenticatedConsoleIndexRoute
   '/console/apps/new': typeof AuthenticatedConsoleAppsNewRoute
   '/api/public/auth/providers': typeof ApiPublicAuthProvidersRoute
@@ -1242,7 +1242,6 @@ export interface FileRoutesById {
   '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
   '/.well-known/jwks.json': typeof DotwellKnownJwksDotjsonRoute
   '/.well-known/openid-configuration': typeof DotwellKnownOpenidConfigurationRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/console': typeof AuthenticatedConsoleRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/domains': typeof AuthenticatedDomainsRoute
@@ -1300,6 +1299,7 @@ export interface FileRoutesById {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/console/': typeof AuthenticatedConsoleIndexRoute
   '/_authenticated/console/apps/$appId': typeof AuthenticatedConsoleAppsAppIdRouteWithChildren
   '/_authenticated/console/apps/new': typeof AuthenticatedConsoleAppsNewRoute
@@ -1388,7 +1388,6 @@ export interface FileRouteTypes {
     | '/.well-known/atproto-did'
     | '/.well-known/jwks.json'
     | '/.well-known/openid-configuration'
-    | '/admin'
     | '/console'
     | '/dashboard'
     | '/domains'
@@ -1446,6 +1445,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/admin/'
     | '/console/'
     | '/console/apps/$appId'
     | '/console/apps/new'
@@ -1531,7 +1531,6 @@ export interface FileRouteTypes {
     | '/.well-known/atproto-did'
     | '/.well-known/jwks.json'
     | '/.well-known/openid-configuration'
-    | '/admin'
     | '/dashboard'
     | '/domains'
     | '/my-data'
@@ -1587,6 +1586,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/admin'
     | '/console'
     | '/console/apps/new'
     | '/api/public/auth/providers'
@@ -1673,7 +1673,6 @@ export interface FileRouteTypes {
     | '/.well-known/atproto-did'
     | '/.well-known/jwks.json'
     | '/.well-known/openid-configuration'
-    | '/_authenticated/admin'
     | '/_authenticated/console'
     | '/_authenticated/dashboard'
     | '/_authenticated/domains'
@@ -1731,6 +1730,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/_authenticated/admin/'
     | '/_authenticated/console/'
     | '/_authenticated/console/apps/$appId'
     | '/_authenticated/console/apps/new'
@@ -2151,13 +2151,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotwellKnownOpenidConfigurationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/console': {
       id: '/_authenticated/console'
       path: '/console'
@@ -2312,61 +2305,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/contact': {
       id: '/_authenticated/admin/contact'
-      path: '/contact'
+      path: '/admin/contact'
       fullPath: '/admin/contact'
       preLoaderRoute: typeof AuthenticatedAdminContactRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/custom-badges': {
       id: '/_authenticated/admin/custom-badges'
-      path: '/custom-badges'
+      path: '/admin/custom-badges'
       fullPath: '/admin/custom-badges'
       preLoaderRoute: typeof AuthenticatedAdminCustomBadgesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/gift-cards': {
       id: '/_authenticated/admin/gift-cards'
-      path: '/gift-cards'
+      path: '/admin/gift-cards'
       fullPath: '/admin/gift-cards'
       preLoaderRoute: typeof AuthenticatedAdminGiftCardsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/ops': {
       id: '/_authenticated/admin/ops'
-      path: '/ops'
+      path: '/admin/ops'
       fullPath: '/admin/ops'
       preLoaderRoute: typeof AuthenticatedAdminOpsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/sepa': {
       id: '/_authenticated/admin/sepa'
-      path: '/sepa'
+      path: '/admin/sepa'
       fullPath: '/admin/sepa'
       preLoaderRoute: typeof AuthenticatedAdminSepaRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/subdomains': {
       id: '/_authenticated/admin/subdomains'
-      path: '/subdomains'
+      path: '/admin/subdomains'
       fullPath: '/admin/subdomains'
       preLoaderRoute: typeof AuthenticatedAdminSubdomainsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/verifications': {
       id: '/_authenticated/admin/verifications'
-      path: '/verifications'
+      path: '/admin/verifications'
       fullPath: '/admin/verifications'
       preLoaderRoute: typeof AuthenticatedAdminVerificationsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/webhooks': {
       id: '/_authenticated/admin/webhooks'
-      path: '/webhooks'
+      path: '/admin/webhooks'
       fullPath: '/admin/webhooks'
       preLoaderRoute: typeof AuthenticatedAdminWebhooksRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/console/': {
       id: '/_authenticated/console/'
@@ -2898,31 +2898,6 @@ const UsernameRouteWithChildren = UsernameRoute._addFileChildren(
   UsernameRouteChildren,
 )
 
-interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminContactRoute: typeof AuthenticatedAdminContactRoute
-  AuthenticatedAdminCustomBadgesRoute: typeof AuthenticatedAdminCustomBadgesRoute
-  AuthenticatedAdminGiftCardsRoute: typeof AuthenticatedAdminGiftCardsRoute
-  AuthenticatedAdminOpsRoute: typeof AuthenticatedAdminOpsRoute
-  AuthenticatedAdminSepaRoute: typeof AuthenticatedAdminSepaRoute
-  AuthenticatedAdminSubdomainsRoute: typeof AuthenticatedAdminSubdomainsRoute
-  AuthenticatedAdminVerificationsRoute: typeof AuthenticatedAdminVerificationsRoute
-  AuthenticatedAdminWebhooksRoute: typeof AuthenticatedAdminWebhooksRoute
-}
-
-const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
-  AuthenticatedAdminContactRoute: AuthenticatedAdminContactRoute,
-  AuthenticatedAdminCustomBadgesRoute: AuthenticatedAdminCustomBadgesRoute,
-  AuthenticatedAdminGiftCardsRoute: AuthenticatedAdminGiftCardsRoute,
-  AuthenticatedAdminOpsRoute: AuthenticatedAdminOpsRoute,
-  AuthenticatedAdminSepaRoute: AuthenticatedAdminSepaRoute,
-  AuthenticatedAdminSubdomainsRoute: AuthenticatedAdminSubdomainsRoute,
-  AuthenticatedAdminVerificationsRoute: AuthenticatedAdminVerificationsRoute,
-  AuthenticatedAdminWebhooksRoute: AuthenticatedAdminWebhooksRoute,
-}
-
-const AuthenticatedAdminRouteWithChildren =
-  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
-
 interface AuthenticatedConsoleAppsAppIdRouteChildren {
   AuthenticatedConsoleAppsAppIdAdvancedRoute: typeof AuthenticatedConsoleAppsAppIdAdvancedRoute
   AuthenticatedConsoleAppsAppIdAiPromptsRoute: typeof AuthenticatedConsoleAppsAppIdAiPromptsRoute
@@ -3033,21 +3008,37 @@ const AuthenticatedDashboardRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedConsoleRoute: typeof AuthenticatedConsoleRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
   AuthenticatedDomainsRoute: typeof AuthenticatedDomainsRoute
   AuthenticatedMyDataRoute: typeof AuthenticatedMyDataRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedAdminContactRoute: typeof AuthenticatedAdminContactRoute
+  AuthenticatedAdminCustomBadgesRoute: typeof AuthenticatedAdminCustomBadgesRoute
+  AuthenticatedAdminGiftCardsRoute: typeof AuthenticatedAdminGiftCardsRoute
+  AuthenticatedAdminOpsRoute: typeof AuthenticatedAdminOpsRoute
+  AuthenticatedAdminSepaRoute: typeof AuthenticatedAdminSepaRoute
+  AuthenticatedAdminSubdomainsRoute: typeof AuthenticatedAdminSubdomainsRoute
+  AuthenticatedAdminVerificationsRoute: typeof AuthenticatedAdminVerificationsRoute
+  AuthenticatedAdminWebhooksRoute: typeof AuthenticatedAdminWebhooksRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedConsoleRoute: AuthenticatedConsoleRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
   AuthenticatedDomainsRoute: AuthenticatedDomainsRoute,
   AuthenticatedMyDataRoute: AuthenticatedMyDataRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedAdminContactRoute: AuthenticatedAdminContactRoute,
+  AuthenticatedAdminCustomBadgesRoute: AuthenticatedAdminCustomBadgesRoute,
+  AuthenticatedAdminGiftCardsRoute: AuthenticatedAdminGiftCardsRoute,
+  AuthenticatedAdminOpsRoute: AuthenticatedAdminOpsRoute,
+  AuthenticatedAdminSepaRoute: AuthenticatedAdminSepaRoute,
+  AuthenticatedAdminSubdomainsRoute: AuthenticatedAdminSubdomainsRoute,
+  AuthenticatedAdminVerificationsRoute: AuthenticatedAdminVerificationsRoute,
+  AuthenticatedAdminWebhooksRoute: AuthenticatedAdminWebhooksRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
